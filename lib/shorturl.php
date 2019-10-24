@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * shorturl.php
  *
  * URL短縮ライブラリ shorturl.php
