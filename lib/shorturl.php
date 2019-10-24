@@ -11,9 +11,9 @@
  * @example		@linkの内容を参照
  * @license		Apache License 2.0
  * @version		0.1.3
- * @since 		0.1.3 get_short_url_from_pagenameの引数にデフォルト値を追加し、長いページ名から短いページ名のみの取得に対応
+ * @since 		0.1.3 2019/07/13 get_short_url_from_pagenameの引数にデフォルト値を追加し、長いページ名から短いページ名のみの取得に対応
  * @since 		0.1.2 2019/07/02 get_short_url_from_pagenameでページ名が有効かデフォルトページかを先に評価する（戻り値に'?'を追加する仕様に戻した）
- * @since 		0.1.1 2019/06/02 get_short_url_from_pagenameの戻り値から'?'を削除
+ * @since 		0.1.1 2019/06/20 get_short_url_from_pagenameの戻り値から'?'を削除
  * @since 		0.1.0 2019/06/02 暫定初公開
  *
  */
