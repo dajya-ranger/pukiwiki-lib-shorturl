@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // make_link.php
 // Copyright
-//   2003-2020 PukiWiki Development Team
+//   2003-2019 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -20,15 +20,12 @@
  * @link		https://dajya-ranger.com/pukiwiki/embed-url-shortener/
  * @example		@linkの内容を参照
  * @license		Apache License 2.0
- * @version		0.2.0
- * @since 		0.2.0 2020/05/14 PukiWiki1.5.3正式対応
- * @since 		0.1.3 2019/07/13 get_short_url_from_pagenameの引数にデフォルト値を追加し、長いページ名から短いページ名のみの取得に対応
+ * @version		0.1.2
  * @since 		0.1.2 2019/07/02 get_short_url_from_pagenameでページ名が有効かデフォルトページかを先に評価する（戻り値に'?'を追加する仕様に戻した）
  * @since 		0.1.1 2019/06/20 get_short_url_from_pagenameの戻り値から'?'を削除
  * @since 		0.1.0 2019/06/02 暫定初公開
  *
  */
-
 // To get page exists or filetimes without accessing filesystem
 // Type: array (page => filetime)
 $_cached_page_filetime = null;
@@ -104,11 +101,9 @@ class InlineConverter
 				'url_interwiki', // URLs (interwiki definition)
 				'mailto',        // mailto: URL schemes
 				'interwikiname', // InterWikiNames
-				'autoalias',     // AutoAlias
 				'autolink',      // AutoLinks
 				'bracketname',   // BracketNames
 				'wikiname',      // WikiNames
-				'autoalias_a',   // AutoAlias(alphabet)
 				'autolink_a',    // AutoLinks(alphabet)
 			);
 		}
@@ -798,72 +793,6 @@ class Link_autolink_a extends Link_autolink
 	}
 }
 
-// AutoAlias
-class Link_autoalias extends Link
-{
-	var $forceignorepages = array();
-	var $auto;
-	var $auto_a; // alphabet only
-	var $alias;
-
-	function Link_autoalias($start)
-	{
-		global $autoalias, $aliaspage;
-
-		parent::Link($start);
-
-		if (! $autoalias || ! file_exists(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE) || $this->page == $aliaspage)
-		{
-			return;
-		}
-
-		@list($auto, $auto_a, $forceignorepages) = file(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE);
-		$this->auto = $auto;
-		$this->auto_a = $auto_a;
-		$this->forceignorepages = explode("\t", trim($forceignorepages));
-		$this->alias = '';
-	}
-	function get_pattern()
-	{
-		return isset($this->auto) ? '(' . $this->auto . ')' : FALSE;
-	}
-	function get_count()
-	{
-		return 1;
-	}
-	function set($arr,$page)
-	{
-		list($name) = $this->splice($arr);
-		// Ignore pages listed
-		if (in_array($name, $this->forceignorepages) || get_autoalias_right_link($name) == '') {
-			return FALSE;
-		}
-		return parent::setParam($page,$name,'','pagename',$name);
-	}
-
-	function toString()
-	{
-		$this->alias = get_autoalias_right_link($this->name);
-		if ($this->alias != '') {
-			$link = '[[' . $this->name . '>' . $this->alias . ']]';
-			return make_link($link);
-		}
-		return '';
-	}
-}
-
-class Link_autoalias_a extends Link_autoalias
-{
-	function Link_autoalias_a($start)
-	{
-		parent::Link_autoalias($start);
-	}
-	function get_pattern()
-	{
-		return isset($this->auto_a) ? '(' . $this->auto_a . ')' : FALSE;
-	}
-}
-
 // Make hyperlink for the page
 function make_pagelink($page, $alias = '', $anchor = '', $refer = '', $isautolink = FALSE)
 {
@@ -907,8 +836,7 @@ function make_pagelink($page, $alias = '', $anchor = '', $refer = '', $isautolin
 			'"' . $title_attr_html . ' class="' .
 			$attrs['class'] . '" data-mtime="' . $attrs['data_mtime'] .
 			'">' . $s_alias . '</a>' . $al_right;
-		*/
-		// 別窓で開くページを記述した場合（「エイリアス>>ページ名」）エイリアスに2つ目の「>」が含まれ「&gt;」となるため、デコードする 2019/08/20
+		*/		// 別窓で開くページを記述した場合（「エイリアス>>ページ名」）エイリアスに2つ目の「>」が含まれ「&gt;」となるため、デコードする 2019/08/20
 		$s_alias = htmlspecialchars_decode($s_alias);
 		if (preg_match('/(.*)>$/', $s_alias, $matche_array)) {
 			// エイリアス末尾が「>」の場合は別窓リンクとして編集する
@@ -931,18 +859,15 @@ function make_pagelink($page, $alias = '', $anchor = '', $refer = '', $isautolin
 		}
 		// Dangling link
 		if (PKWK_READONLY) return $s_alias; // No dacorations
-		$symbol_html = '';
-		if ($_symbol_noexists !== '') {
-			$symbol_html = '<span style="user-select:none;">' .
-				htmlsc($_symbol_noexists) . '</span>';
-		}
-		$href = $script . '?cmd=edit&amp;page=' . $r_page . $r_refer;
-		if ($link_compact && $_symbol_noexists != '') {
-			$retval = '<a href="' . $href . '">' . $_symbol_noexists . '</a>';
+
+		$retval = $s_alias . '<a href="' .
+			$script . '?cmd=edit&amp;page=' . $r_page . $r_refer . '">' .
+			$_symbol_noexists . '</a>';
+
+		if ($link_compact) {
 			return $retval;
 		} else {
-			$retval = '<a href="' . $href . '">' . $s_alias . '</a>';
-			return '<span class="noexists">' . $retval . $symbol_html . '</span>';
+			return '<span class="noexists">' . $retval . '</span>';
 		}
 	}
 }
@@ -1114,26 +1039,4 @@ Reference: https://pukiwiki.osdn.jp/?AutoTicketLink
  );
 EOS;
 	page_write($autoticketlink_def_page, $body);
-}
-
-function init_autoalias_def_page()
-{
-	global $aliaspage; // 'AutoAliasName'
-	$autoticketlink_def_page = get_autoticketlink_def_page();
-	if (is_page($aliaspage)) {
-		return;
-	}
-	$body = <<<EOS
-#freeze
-*AutoAliasName [#qf9311bb]
-AutoAlias definition
-
-Reference: https://pukiwiki.osdn.jp/?AutoAlias
-
-* PukiWiki [#ee87d39e]
--[[pukiwiki.official>https://pukiwiki.osdn.jp/]]
--[[pukiwiki.dev>https://pukiwiki.osdn.jp/dev/]]
-EOS;
-	page_write($aliaspage, $body);
-	update_autoalias_cache_file();
 }
