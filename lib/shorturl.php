@@ -10,9 +10,8 @@
  * @link		https://dajya-ranger.com/pukiwiki/embed-url-shortener/
  * @example		@linkの内容を参照
  * @license		Apache License 2.0
- * @version		0.2.1
- * @since 		0.2.1 2020/08/10 ディレクトリ定義をDATA_HOMEからの指定に変更
- * @since 		0.2.0 2020/05/14 PukiWiki1.5.3正式対応
+ * @version		0.1.4
+ * @since 		0.1.4 2020/08/10 ディレクトリ定義をDATA_HOMEからの指定に変更
  * @since 		0.1.3 2019/07/13 get_short_url_from_pagenameの引数にデフォルト値を追加し、長いページ名から短いページ名のみの取得に対応
  * @since 		0.1.2 2019/07/02 get_short_url_from_pagenameでページ名が有効かデフォルトページかを先に評価する（戻り値に'?'を追加する仕様に戻した）
  * @since 		0.1.1 2019/06/20 get_short_url_from_pagenameの戻り値から'?'を削除
@@ -25,7 +24,6 @@ define('SHORT_URL_DIR', DATA_HOME . '/shortener');
 
 // url name counter map directory
 define('SHORT_URL_COUNTER_DIR', DATA_HOME . '/shortener_counter');
-
 // url string length
 define('SHORT_URL_PAGEID_LENGTH', 10);
 
